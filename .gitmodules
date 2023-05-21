@@ -8,3 +8,4 @@
 [submodule "SDL2_gfx"]
 	path = SDL2_gfx
 	url = https://github.com/mupfdev/SDL2_gfx
+	

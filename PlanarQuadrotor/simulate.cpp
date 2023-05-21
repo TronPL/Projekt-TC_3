@@ -2,10 +2,7 @@
  * SDL window creation adapted from https://github.com/isJuhn/DoublePendulum
 */
 #include "simulate.h"
-#include <cmath>
-#include <matplot/matplot.h>
-#include <Eigen/Dense>
-#include <iostream>
+
 
 
 Eigen::MatrixXf LQR(PlanarQuadrotor &quadrotor, float dt) {
@@ -76,6 +73,7 @@ int main(int argc, char* args[])
     std::vector<float> y_history;
     std::vector<float> theta_history;
 
+
     if (init(gWindow, gRenderer, SCREEN_WIDTH, SCREEN_HEIGHT) >= 0)
     {
         SDL_Event e;
@@ -83,7 +81,6 @@ int main(int argc, char* args[])
         float delay;
         int x, y;
         Eigen::VectorXf state = Eigen::VectorXf::Zero(6);
-        
         while (!quit)
         {
             //events
@@ -129,6 +126,14 @@ int main(int argc, char* args[])
                         auto l_2= plot(time,theta_history);
                         title("theta history");
                         show();
+                    }
+                    if(e.key.keysym.sym==SDLK_q)
+                    {
+                        
+                    }
+                    if(e.key.keysym.sym==SDLK_w)
+                    {
+                       
                     }
                 }
                 else if (e.type == SDL_MOUSEMOTION)

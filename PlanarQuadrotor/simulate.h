@@ -1,10 +1,12 @@
 #pragma once
 #include <iostream>
 #include <memory>
-
+#include <cmath>
+#include <matplot/matplot.h>
 #include <Eigen/Dense>
 #include <SDL.h>
 #include <SDL2_gfx/SDL2_gfxPrimitives.h>
+#include <SDL2_mixer>
 
 #include "planar_quadrotor.h"
 #include "planar_quadrotor_visualizer.h"
