@@ -9,8 +9,8 @@
 
 class PlanarQuadrotorVisualizer {
 private:
-    PlanarQuadrotor *quadrotor_ptr;
 public:
+    PlanarQuadrotor *quadrotor_ptr;
     PlanarQuadrotorVisualizer(PlanarQuadrotor *quadrotor_ptr);
     void render(std::shared_ptr<SDL_Renderer> &gRenderer);
 };

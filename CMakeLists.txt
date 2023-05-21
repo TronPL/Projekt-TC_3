@@ -29,9 +29,13 @@ target_link_libraries(plot Eigen)
 
 set(PLANAR_QUADROTOR_SOURCES PlanarQuadrotor/simulate.cpp PlanarQuadrotor/planar_quadrotor.cpp PlanarQuadrotor/planar_quadrotor_visualizer.cpp PlanarQuadrotor/lqr.cpp)
 add_executable(planar_quadrotor ${PLANAR_QUADROTOR_SOURCES})
+##########################TUTAJ ZMIENIONE###########################
+link_directories(C:/Users/kinba/OneDrive/Desktop/tp_projekt_3/SDL2_gfx)
+target_link_libraries(planar_quadrotor SDL2_gfx)
+####################################################################
 if(TARGET SDL2::SDL2main)
     # It has an implicit dependency on SDL2 functions, so it MUST be added before SDL2::SDL2 (or SDL2::SDL2-static)
     target_link_libraries(planar_quadrotor SDL2::SDL2main)
 endif()
-target_link_libraries(planar_quadrotor SDL2::SDL2 SDL2_gfx Eigen matplot)
+target_link_libraries(planar_quadrotor SDL2::SDL2 Eigen matplot)
 target_include_directories(planar_quadrotor PRIVATE ${PROJECT_SOURCE_DIR})

@@ -2,6 +2,11 @@
  * SDL window creation adapted from https://github.com/isJuhn/DoublePendulum
 */
 #include "simulate.h"
+#include <cmath>
+#include <matplot/matplot.h>
+#include <Eigen/Dense>
+#include <iostream>
+
 
 Eigen::MatrixXf LQR(PlanarQuadrotor &quadrotor, float dt) {
     /* Calculate LQR gain matrix */
@@ -15,9 +20,9 @@ Eigen::MatrixXf LQR(PlanarQuadrotor &quadrotor, float dt) {
     Eigen::MatrixXf K = Eigen::MatrixXf::Zero(6, 6);
     Eigen::Vector2f input = quadrotor.GravityCompInput();
 
-    Q.diagonal() << 10, 10, 10, 1, 10, 0.25 / 2 / M_PI;
-    R.row(0) << 0.1, 0.05;
-    R.row(1) << 0.05, 0.1;
+    Q.diagonal() << 4e-3, 4e-3, 4e2, 8e-3, 4.5e-2, 2 / 2 / M_PI;
+    R.row(0) << 3e1, 7;
+    R.row(1) << 7, 3e1;
 
     std::tie(A, B) = quadrotor.Linearize();
     A_discrete = Eye + dt * A;
@@ -45,6 +50,7 @@ int main(int argc, char* args[])
      * 2. Update PlanarQuadrotor from simulation when goal is changed
     */
     Eigen::VectorXf initial_state = Eigen::VectorXf::Zero(6);
+    initial_state << SCREEN_WIDTH/2,SCREEN_HEIGHT/2, 0, 0, 0, 0;
     PlanarQuadrotor quadrotor(initial_state);
     PlanarQuadrotorVisualizer quadrotor_visualizer(&quadrotor);
     /**
@@ -53,10 +59,10 @@ int main(int argc, char* args[])
      * For implemented LQR controller, it has to be [x, y, 0, 0, 0, 0]
     */
     Eigen::VectorXf goal_state = Eigen::VectorXf::Zero(6);
-    goal_state << -1, 7, 0, 0, 0, 0;
+    goal_state << initial_state;
     quadrotor.SetGoal(goal_state);
     /* Timestep for the simulation */
-    const float dt = 0.001;
+    const float dt = 0.01;
     Eigen::MatrixXf K = LQR(quadrotor, dt);
     Eigen::Vector2f input = Eigen::Vector2f::Zero(2);
 
@@ -65,6 +71,7 @@ int main(int argc, char* args[])
      * 1. Update x, y, theta history vectors to store trajectory of the quadrotor
      * 2. Plot trajectory using matplot++ when key 'p' is clicked
     */
+   std::vector<float> time;
     std::vector<float> x_history;
     std::vector<float> y_history;
     std::vector<float> theta_history;
@@ -76,7 +83,7 @@ int main(int argc, char* args[])
         float delay;
         int x, y;
         Eigen::VectorXf state = Eigen::VectorXf::Zero(6);
-
+        
         while (!quit)
         {
             //events
@@ -86,15 +93,57 @@ int main(int argc, char* args[])
                 {
                     quit = true;
                 }
+                if (e.type == SDL_MOUSEBUTTONDOWN)
+                {
+                    SDL_GetMouseState(&x, &y);
+                    goal_state <<x, y, 0, 0, 0, 0;
+                    //std::cout << goal_state(0)<< " "<<goal_state(0)<< std::endl;
+                    quadrotor.SetGoal(goal_state);
+                }
+                if(e.type == SDL_KEYDOWN)
+                {
+                    if(e.key.keysym.sym==SDLK_p)
+                    {
+                        using namespace matplot;
+                        auto l_1= plot(x_history,y_history);
+                        title("X Y");
+                        show();
+                    }
+                    if(e.key.keysym.sym==SDLK_x)
+                    {
+                        using namespace matplot;
+                        auto l_1= plot(time,x_history);
+                        title("x history");
+                        show();
+                    }
+                    if(e.key.keysym.sym==SDLK_y)
+                    {
+                        using namespace matplot;
+                        auto l_2= plot(time,y_history);
+                        title("y history");
+                        show();
+                    }
+                    if(e.key.keysym.sym==SDLK_t)
+                    {
+                        using namespace matplot;
+                        auto l_2= plot(time,theta_history);
+                        title("theta history");
+                        show();
+                    }
+                }
                 else if (e.type == SDL_MOUSEMOTION)
                 {
                     SDL_GetMouseState(&x, &y);
-                    std::cout << "Mouse position: (" << x << ", " << y << ")" << std::endl;
+                    //std::cout << "Mouse position: (" << x << ", " << y << ")" << std::endl;
                 }
                 
             }
-
             SDL_Delay((int) dt * 1000);
+            Eigen::VectorXf state = quadrotor_visualizer.quadrotor_ptr->GetState();
+            time.push_back(SDL_GetTicks());
+            x_history.push_back(state[0]);
+            y_history.push_back(-state[1]);
+            theta_history.push_back(state[2]);
 
             SDL_SetRenderDrawColor(gRenderer.get(), 0xFF, 0xFF, 0xFF, 0xFF);
             SDL_RenderClear(gRenderer.get());
